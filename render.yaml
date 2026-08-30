@@ -1,0 +1,55 @@
+databases:
+  - name: homeops-db
+    plan: free
+    databaseName: homeops
+    user: homeops
+
+services:
+  - type: web
+    name: homeops
+    runtime: python
+    plan: free
+    buildCommand: bash scripts/render-build.sh
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+
+      # Postgres. Render hands out a postgresql:// URL; SQLAlchemy needs the
+      # asyncpg driver named explicitly, so app/config.py normalises it.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: homeops-db
+          property: connectionString
+
+      - key: HOMEOPS_MOCK
+        value: "1"
+
+      # Dialling stays off until it is deliberately switched on in the
+      # dashboard. A deploy should never start ringing phones on its own.
+      - key: HOMEOPS_ALLOW_REAL_CALLS
+        value: "0"
+      - key: HOMEOPS_CALL_COOLDOWN_SECONDS
+        value: "60"
+
+      # Guava — both voice legs.
+      - key: GUAVA_API_KEY
+        sync: false
+      - key: GUAVA_AGENT_NUMBER
+        sync: false
+      - key: GUAVA_WEBRTC_CODE
+        sync: false
+
+      - key: HOMEOWNER_NAME
+        sync: false
+      - key: LIVE_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: EXA_API_KEY
+        sync: false
+      - key: APIFY_TOKEN
+        sync: false

@@ -1,0 +1,1 @@
+"""HomeOps FastAPI backend."""

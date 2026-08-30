@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: homeops-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: homeops
+      POSTGRES_PASSWORD: homeops
+      POSTGRES_DB: homeops
+    ports:
+      - "5434:5432"          # 5434 on the host; 5432/5433 already taken
+    volumes:
+      - homeops-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homeops -d homeops"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  homeops-pgdata:
